@@ -12,7 +12,46 @@ Fuentes revisadas:
 - `ParkOn_BA_brief.pptx`
 - maqueta previa en `parkon-ba-app/`
 
-## Decision de alcance
+## Decision de alcance actual
+
+Para este proyecto se trabajara sobre la app existente `parkon-ba-conductor-app`, desarrollada con React, Vite y TypeScript. El alcance elegido para la demo es el perfil **Conductor**.
+
+El login sera la primera pantalla de la aplicacion. El conductor debera iniciar sesion o registrarse antes de acceder al flujo principal. Si ya inicio sesion, la app conserva la sesion para volver a entrar directamente.
+
+Los datos mock se organizaran en archivos JSON dentro de `src/data`. Como el frontend puro no puede modificar archivos JSON en tiempo de ejecucion, la estrategia definida para esta etapa es:
+
+- usar JSON como semilla inicial de datos;
+- copiar esos datos a `localStorage` en el navegador;
+- registrar usuarios, validar login y editar cuenta desde `localStorage`;
+- mantener esta persistencia como simulacion defendible para la demo sin backend.
+
+La referencia visual prioritaria para la UI es `screens.pdf`. Las pantallas deben respetar ese lenguaje: login blanco con logo arriba, inicio con header azul oscuro, mapa claro con pins de estacionamiento, tarjeta flotante de cochera, navegacion inferior simple y reserva confirmada con QR.
+
+La implementacion debe mantenerse modular:
+
+- `App.tsx`: provider y decision entre autenticacion o app del conductor.
+- `src/screens`: pantallas completas del flujo.
+- `src/components`: header, navegacion, mapa mock, tarjetas y QR.
+- `src/layout`: marco mobile reutilizable.
+- `src/data`: JSON semilla.
+- `src/types`: contratos TypeScript.
+
+Cuenta base para pruebas:
+
+- Email: `juan@parkonba.com`
+- Contrasena: `123456`
+
+### Campos del conductor
+
+- id
+- nombre
+- email
+- password
+- telefono
+- patente
+- vehiculo
+
+## Decision de alcance original
 
 La consigna deberia quedar planteada asi:
 

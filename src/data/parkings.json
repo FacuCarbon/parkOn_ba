@@ -1,0 +1,58 @@
+[
+  {
+    "id": "parking-palermo",
+    "nombre": "Parking Palermo",
+    "direccion": "Gurruchaga 2148",
+    "zona": "Palermo",
+    "distancia": "0,7 km",
+    "tiempo": "8 min",
+    "tarifaHora": 1450,
+    "tarifaOchoHoras": 9200,
+    "disponibilidad": 6,
+    "rating": 4.4,
+    "servicios": ["Cubierto", "Seguridad 24hs", "Camaras", "Acceso con QR"],
+    "imagen": "/imagen.jpg"
+  },
+  {
+    "id": "parking-nunez",
+    "nombre": "Cochera Nuñez",
+    "direccion": "Av. del Libertador 6900",
+    "zona": "Nuñez",
+    "distancia": "1,1 km",
+    "tiempo": "12 min",
+    "tarifaHora": 1100,
+    "tarifaOchoHoras": 7600,
+    "disponibilidad": 9,
+    "rating": 4.2,
+    "servicios": ["Cubierto", "Seguridad 24hs", "Acceso con QR"],
+    "imagen": "/imagen.jpg"
+  },
+  {
+    "id": "parking-belgrano",
+    "nombre": "Garage Belgrano",
+    "direccion": "Av. Cabildo 1840",
+    "zona": "Belgrano",
+    "distancia": "0,2 km",
+    "tiempo": "3 min",
+    "tarifaHora": 1200,
+    "tarifaOchoHoras": 8000,
+    "disponibilidad": 12,
+    "rating": 4.6,
+    "servicios": ["Cubierto", "Seguridad 24hs", "Camaras", "Acceso con QR"],
+    "imagen": "/imagen.jpg"
+  },
+  {
+    "id": "parking-colegiales",
+    "nombre": "Garage Colegiales",
+    "direccion": "Conesa 875",
+    "zona": "Colegiales",
+    "distancia": "0,5 km",
+    "tiempo": "6 min",
+    "tarifaHora": 1300,
+    "tarifaOchoHoras": 8400,
+    "disponibilidad": 4,
+    "rating": 4.1,
+    "servicios": ["Cubierto", "Camaras", "Acceso con QR"],
+    "imagen": "/imagen.jpg"
+  }
+]

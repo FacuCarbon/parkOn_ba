@@ -1,0 +1,11 @@
+[
+  {
+    "id": "usr-juan-001",
+    "nombre": "Juan Perez",
+    "email": "juan@parkonba.com",
+    "password": "123456",
+    "telefono": "11 4567-8901",
+    "patente": "AB123CD",
+    "vehiculo": "Toyota Corolla"
+  }
+]
