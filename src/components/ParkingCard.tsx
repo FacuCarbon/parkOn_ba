@@ -9,20 +9,28 @@ export function ParkingCard({
   parking,
   onReserve,
   compact = false,
+  mapOverlay = false,
 }: {
   parking: Parking;
   onReserve?: () => void;
   compact?: boolean;
+  mapOverlay?: boolean;
 }) {
   const hasAvailability = parking.disponibilidad > 0;
 
   return (
-    <article className="rounded-[15px] bg-white p-[18px] shadow-[0_12px_34px_rgba(8,20,45,0.14)]">
-      <img
+    <article
+      className={`rounded-[15px] bg-white shadow-[0_12px_34px_rgba(8,20,45,0.14)] ${
+        mapOverlay ? "p-[12px]" : "p-[18px]"
+      }`}
+    >
+      {/* <img
         src={parking.imagen}
         alt={parking.nombre}
-        className="mb-4 h-[112px] w-full rounded-xl object-cover"
-      />
+        className={`w-full rounded-xl object-cover ${
+          mapOverlay ? "mb-3 h-[68px]" : "mb-4 h-[112px]"
+        }`}
+      /> */}
       <div className="flex items-start justify-between gap-3">
         <div>
           <p
@@ -55,7 +63,11 @@ export function ParkingCard({
 
       {!compact && (
         <button
-          className="mt-4 min-h-[50px] w-full rounded-lg border-0 bg-[#002856] text-[0.95rem] font-black text-white disabled:bg-[#aeb8c5]"
+          className={`w-full rounded-lg border-0 bg-[#002856] font-black text-white disabled:bg-[#aeb8c5] ${
+            mapOverlay
+              ? "mt-3 min-h-[42px] text-[0.86rem]"
+              : "mt-4 min-h-[50px] text-[0.95rem]"
+          }`}
           disabled={!hasAvailability}
           onClick={onReserve}
           type="button"

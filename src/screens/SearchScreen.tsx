@@ -20,6 +20,7 @@ export function SearchScreen({
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterId>("Disponible");
   const [showList, setShowList] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const filteredParkings = useMemo(() => {
     return parkings.filter((item) => {
       const matchesQuery = `${item.nombre} ${item.direccion} ${item.zona}`
@@ -41,11 +42,13 @@ export function SearchScreen({
   const visibleParking = selectedParkingMatchesFilter
     ? parking
     : filteredParkings[0];
-  const displayedParkings = filteredParkings.length > 0 ? filteredParkings : parkings;
+  const displayedParkings = filteredParkings;
+  const visibleParkingHasAvailability =
+    (visibleParking?.disponibilidad ?? 0) > 0;
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <div className="px-[26px] pb-[13px] pt-[13px]">
+      <div className="relative z-20 px-[26px] pb-[13px] pt-[13px]">
         <div className="mb-3 flex items-center justify-between gap-3">
           <p className="m-0 text-[1.02rem] font-black leading-none text-[#071226]">
             Buscar cochera
@@ -58,15 +61,57 @@ export function SearchScreen({
             <SlidersHorizontal size={18} />
           </button>
         </div>
-        <label className="flex min-h-[47px] items-center gap-3 rounded-xl bg-white px-[15px] shadow-[0_8px_18px_rgba(8,20,45,0.16)]">
-          <input
-            className="min-w-0 flex-1 border-0 bg-transparent text-[0.88rem] font-bold text-[#071226] outline-0 placeholder:text-[#17243a]"
-            placeholder="Zona, direccion o lugar"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-          <Search size={20} strokeWidth={2.4} className="text-[#1d2a3f]" />
-        </label>
+        <div className="relative">
+          <label className="flex min-h-[47px] items-center gap-3 rounded-xl bg-white px-[15px] shadow-[0_8px_18px_rgba(8,20,45,0.16)]">
+            <input
+              className="min-w-0 flex-1 border-0 bg-transparent text-[0.88rem] font-bold text-[#071226] outline-0 placeholder:text-[#17243a]"
+              placeholder="Zona, direccion o lugar"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+            />
+            <Search size={20} strokeWidth={2.4} className="text-[#1d2a3f]" />
+          </label>
+          {showSuggestions && query.trim().length > 0 && filteredParkings.length > 0 && (
+            <div className="absolute left-0 right-0 top-[52px] z-30 mt-2 overflow-hidden rounded-[14px] border border-[#e7ecf2] bg-white shadow-[0_12px_28px_rgba(8,20,45,0.14)]">
+              {filteredParkings.slice(0, 3).map((item) => (
+                <button
+                  key={item.id}
+                  className="flex w-full items-center justify-between gap-3 border-0 border-b border-[#eef2f6] bg-white px-4 py-3 text-left last:border-b-0"
+                  onClick={() => {
+                    onSelectParking(item);
+                    setQuery(item.nombre);
+                    setShowSuggestions(false);
+                  }}
+                  type="button"
+                >
+                  <div className="min-w-0">
+                    <p className="m-0 truncate text-[0.82rem] font-black text-[#071226]">
+                      {item.nombre}
+                    </p>
+                    <p className="m-0 mt-1 truncate text-[0.68rem] font-bold text-[#4b5870]">
+                      {item.direccion}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-1 text-[0.62rem] font-black ${
+                      item.disponibilidad > 0
+                        ? "bg-[#eef8f0] text-[#2DB84B]"
+                        : "bg-[#fff1f1] text-[#d14343]"
+                    }`}
+                  >
+                    {item.disponibilidad > 0
+                      ? `${item.disponibilidad} libres`
+                      : "Sin lugares"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="mt-3 flex gap-2 overflow-hidden">
           {filters.map((filter) => (
             <button
@@ -138,7 +183,9 @@ export function SearchScreen({
                     </p>
                     <p className="m-0 mt-1 text-[0.7rem] font-bold text-[#4b5870]">
                       A {item.tiempo} · {item.distancia} ·{" "}
-                      {item.disponibilidad} lugares
+                      {item.disponibilidad > 0
+                        ? `${item.disponibilidad} lugares`
+                        : "Sin lugares"}
                     </p>
                   </button>
                 ))
@@ -150,11 +197,20 @@ export function SearchScreen({
             </p>
           ) : (
             <button
-              className="flex w-full items-center justify-between gap-3 rounded-xl border border-[#edf1f6] bg-[#fbfcfe] p-3 text-left"
+              className={`flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left ${
+                visibleParkingHasAvailability
+                  ? "border-[#edf1f6] bg-[#fbfcfe]"
+                  : "border-[#f2d4d4] bg-[#fff8f8]"
+              }`}
               onClick={() => {
+                if (!visibleParkingHasAvailability) {
+                  return;
+                }
+
                 onSelectParking(visibleParking);
                 onReserve();
               }}
+              disabled={!visibleParkingHasAvailability}
               type="button"
             >
               <div>
@@ -163,14 +219,22 @@ export function SearchScreen({
                 </h2>
                 <p className="mt-1 text-[0.72rem] font-bold text-[#4b5870]">
                   A {visibleParking.tiempo} · {visibleParking.distancia} ·{" "}
-                  {visibleParking.disponibilidad} lugares
+                  {visibleParkingHasAvailability
+                    ? `${visibleParking.disponibilidad} lugares`
+                    : "Sin lugares disponibles"}
                 </p>
                 <p className="mt-2 text-[0.82rem] font-black text-[#071226]">
                   ${visibleParking.tarifaHora.toLocaleString("es-AR")} / hora
                 </p>
               </div>
-              <span className="rounded-full bg-[#eef8f0] px-2 py-1 text-[0.66rem] font-black text-[#2DB84B]">
-                Disponible
+              <span
+                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[0.66rem] font-black ${
+                  visibleParkingHasAvailability
+                    ? "bg-[#eef8f0] text-[#2DB84B]"
+                    : "bg-[#fff1f1] text-[#d14343]"
+                }`}
+              >
+                {visibleParkingHasAvailability ? "Disponible" : "Sin lugares"}
               </span>
             </button>
           )}
