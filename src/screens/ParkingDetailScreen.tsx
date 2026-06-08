@@ -119,7 +119,7 @@ export function ParkingDetailScreen({
               <span className="text-[#8b97aa]">· A 2 min</span>
             </p>
           </div>
-          <span className="rounded-full bg-[#eef8f0] px-3 py-1 text-xs font-black text-[#2DB84B]">
+          <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-[#eef8f0] px-3 py-1 text-xs font-black leading-none text-[#2DB84B]">
             {hasAvailability ? `${parking.disponibilidad} libres` : "Sin lugares"}
           </span>
         </div>
@@ -141,7 +141,7 @@ export function ParkingDetailScreen({
                 {selection.dateLabel}
               </p>
             </div>
-            <span className="rounded-full bg-[#f4fbf5] px-3 py-1 text-xs font-black text-[#2DB84B]">
+            <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-[#f4fbf5] px-3 py-1 text-xs font-black leading-none text-[#2DB84B]">
               {hasAvailability ? "Disponible" : "Sin disponibilidad"}
             </span>
           </div>
@@ -154,7 +154,7 @@ export function ParkingDetailScreen({
               return (
                 <button
                   key={slot.time}
-                  className={`rounded-xl border p-2 text-center ${
+                  className={`min-w-0 rounded-xl border px-1 py-2 text-center ${
                     isSelected
                       ? "border-[#2DB84B] bg-[#2DB84B] text-white"
                       : "border-[#e6edf4] bg-white text-[#071226]"
@@ -166,7 +166,7 @@ export function ParkingDetailScreen({
                     {slot.time}
                   </span>
                   <span
-                    className={`mt-1 block text-[0.62rem] font-bold ${
+                    className={`mt-1 block whitespace-nowrap text-[0.56rem] font-bold leading-none ${
                       isSelected ? "text-white/85" : "text-[#2DB84B]"
                     }`}
                   >
