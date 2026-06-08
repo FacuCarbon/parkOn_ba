@@ -11,7 +11,7 @@
     "disponibilidad": 6,
     "rating": 4.4,
     "servicios": ["Cubierto", "Seguridad 24hs", "Camaras", "Acceso con QR"],
-    "imagen": "/imagen.jpg"
+    "imagen": "/parking.jpeg"
   },
   {
     "id": "parking-nunez",
@@ -25,7 +25,7 @@
     "disponibilidad": 9,
     "rating": 4.2,
     "servicios": ["Cubierto", "Seguridad 24hs", "Acceso con QR"],
-    "imagen": "/imagen.jpg"
+    "imagen": "/parking.jpeg"
   },
   {
     "id": "parking-belgrano",
@@ -39,7 +39,7 @@
     "disponibilidad": 12,
     "rating": 4.6,
     "servicios": ["Cubierto", "Seguridad 24hs", "Camaras", "Acceso con QR"],
-    "imagen": "/imagen.jpg"
+    "imagen": "/parking.jpeg"
   },
   {
     "id": "parking-colegiales",
@@ -53,6 +53,6 @@
     "disponibilidad": 4,
     "rating": 4.1,
     "servicios": ["Cubierto", "Camaras", "Acceso con QR"],
-    "imagen": "/imagen.jpg"
+    "imagen": "/parking.jpeg"
   }
 ]

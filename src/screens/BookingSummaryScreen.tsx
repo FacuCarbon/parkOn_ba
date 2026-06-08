@@ -48,7 +48,7 @@ export function BookingSummaryScreen({
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
   return (
-    <section className="h-full overflow-y-auto bg-white px-[18px] pb-28 pt-5 text-[#071226]">
+    <section className="h-full overflow-y-auto bg-white px-[18px] pb-5 pt-5 text-[#071226]">
       <div className="mb-5 flex items-center gap-3">
         <button
           className="grid h-9 w-9 place-items-center rounded-full border-0 bg-[#f2f5f9] text-[#071226]"
@@ -153,7 +153,7 @@ export function BookingSummaryScreen({
         </p>
       </div>
 
-      <div className="sticky bottom-0 -mx-[18px] mt-4 border-t border-[#e5eaf1] bg-white px-[18px] py-3">
+      <div className="-mx-[18px] mt-6 border-t border-[#e5eaf1] bg-[#f7f9fc] px-[18px] py-4">
         <button
           className="min-h-[47px] w-full rounded-md border-0 bg-[#2DB84B] text-sm font-black text-white shadow-[0_10px_22px_rgba(45,184,75,0.24)]"
           onClick={() => onPay(paymentMethod)}

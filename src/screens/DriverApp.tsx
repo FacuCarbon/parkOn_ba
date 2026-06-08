@@ -14,9 +14,31 @@ import { ProfileScreen } from "./ProfileScreen";
 import { ReservationsScreen } from "./ReservationsScreen";
 import { SearchScreen } from "./SearchScreen";
 
-const parkingList = parkings as Parking[];
+const initialParkings = parkings as Parking[];
 type BookingStep = "tabs" | "detail" | "summary" | "qr";
 const RESERVATION_STORAGE_KEY = "parkonba.reservations";
+const PARKING_STORAGE_KEY = "parkonba.parkings";
+
+function readStoredParkings(): Parking[] {
+  const storedParkings = window.localStorage.getItem(PARKING_STORAGE_KEY);
+
+  if (!storedParkings) {
+    return initialParkings;
+  }
+
+  try {
+    const parsedParkings = JSON.parse(storedParkings) as Parking[];
+
+    return initialParkings.map((parking) => ({
+      ...parking,
+      disponibilidad:
+        parsedParkings.find((storedParking) => storedParking.id === parking.id)
+          ?.disponibilidad ?? parking.disponibilidad,
+    }));
+  } catch {
+    return initialParkings;
+  }
+}
 
 function readStoredReservations(): Reservation[] {
   const storedReservations = window.localStorage.getItem(
@@ -39,6 +61,10 @@ function persistReservations(reservations: Reservation[]) {
     RESERVATION_STORAGE_KEY,
     JSON.stringify(reservations),
   );
+}
+
+function persistParkings(nextParkings: Parking[]) {
+  window.localStorage.setItem(PARKING_STORAGE_KEY, JSON.stringify(nextParkings));
 }
 
 function getFallbackBooking() {
@@ -69,6 +95,9 @@ export function DriverApp() {
   const { currentUser } = useUser();
   const [activeTab, setActiveTab] = useState<TabId>("inicio");
   const [bookingStep, setBookingStep] = useState<BookingStep>("tabs");
+  const [parkingList, setParkingList] = useState<Parking[]>(() =>
+    readStoredParkings(),
+  );
   const [reservations, setReservations] = useState<Reservation[]>(() =>
     readStoredReservations(),
   );
@@ -132,6 +161,12 @@ export function DriverApp() {
       return;
     }
 
+    if (selectedParking.disponibilidad <= 0) {
+      setBookingStep("tabs");
+      setActiveTab("buscar");
+      return;
+    }
+
     if (activeReservations.length >= 3) {
       setBookingStep("tabs");
       setActiveTab("reservas");
@@ -159,11 +194,28 @@ export function DriverApp() {
 
     persistReservations(nextReservations);
     setReservations(nextReservations);
+    setParkingList((currentParkings) => {
+      const nextParkings = currentParkings.map((parking) =>
+        parking.id === selectedParking.id
+          ? {
+              ...parking,
+              disponibilidad: Math.max(0, parking.disponibilidad - 1),
+            }
+          : parking,
+      );
+
+      persistParkings(nextParkings);
+      return nextParkings;
+    });
     setSelectedReservation(reservation);
     setBookingStep("qr");
   }
 
   function cancelReservation(reservationId: string) {
+    const cancelledReservation = reservations.find(
+      (reservation) =>
+        reservation.id === reservationId && reservation.status === "active",
+    );
     const nextReservations = reservations.map((reservation) =>
       reservation.id === reservationId
         ? { ...reservation, status: "cancelled" as const }
@@ -172,6 +224,19 @@ export function DriverApp() {
 
     persistReservations(nextReservations);
     setReservations(nextReservations);
+
+    if (cancelledReservation) {
+      setParkingList((currentParkings) => {
+        const nextParkings = currentParkings.map((parking) =>
+          parking.id === cancelledReservation.parkingId
+            ? { ...parking, disponibilidad: parking.disponibilidad + 1 }
+            : parking,
+        );
+
+        persistParkings(nextParkings);
+        return nextParkings;
+      });
+    }
   }
 
   function openReservationQr(reservation: Reservation) {
