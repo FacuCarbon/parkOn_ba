@@ -36,14 +36,14 @@ function addHours(date: Date, hours: number) {
   return nextDate;
 }
 
-function buildSlots(startDate: Date) {
+function buildSlots(startDate: Date, availability: number) {
   return availabilityValues.map((value, index) => {
     const slotDate = addHours(startDate, index);
 
     return {
       date: slotDate,
       time: formatTime(slotDate),
-      value,
+      value: Math.max(0, Math.min(value, availability - index)),
     };
   });
 }
@@ -62,7 +62,11 @@ export function ParkingDetailScreen({
     buildInitialStartDate(),
   );
   const [durationHours, setDurationHours] = useState(2);
-  const slots = useMemo(() => buildSlots(baseStartDate), [baseStartDate]);
+  const hasAvailability = parking.disponibilidad > 0;
+  const slots = useMemo(
+    () => buildSlots(baseStartDate, parking.disponibilidad),
+    [baseStartDate, parking.disponibilidad],
+  );
   const selection = useMemo<BookingSelection>(() => {
     const endDate = addHours(selectedStartDate, durationHours);
 
@@ -116,7 +120,7 @@ export function ParkingDetailScreen({
             </p>
           </div>
           <span className="rounded-full bg-[#eef8f0] px-3 py-1 text-xs font-black text-[#2DB84B]">
-            {parking.disponibilidad} libres
+            {hasAvailability ? `${parking.disponibilidad} libres` : "Sin lugares"}
           </span>
         </div>
 
@@ -138,7 +142,7 @@ export function ParkingDetailScreen({
               </p>
             </div>
             <span className="rounded-full bg-[#f4fbf5] px-3 py-1 text-xs font-black text-[#2DB84B]">
-              Disponible
+              {hasAvailability ? "Disponible" : "Sin disponibilidad"}
             </span>
           </div>
 
@@ -251,11 +255,12 @@ export function ParkingDetailScreen({
           </strong>
         </div>
         <button
-          className="min-h-[48px] w-full rounded-md border-0 bg-[#002856] text-sm font-black text-white shadow-[0_10px_22px_rgba(0,40,86,0.22)]"
+          className="min-h-[48px] w-full rounded-md border-0 bg-[#002856] text-sm font-black text-white shadow-[0_10px_22px_rgba(0,40,86,0.22)] disabled:bg-[#aeb8c5] disabled:shadow-none"
+          disabled={!hasAvailability}
           onClick={() => onReserve(selection)}
           type="button"
         >
-          Continuar reserva
+          {hasAvailability ? "Continuar reserva" : "Sin lugares disponibles"}
         </button>
       </div>
     </section>
