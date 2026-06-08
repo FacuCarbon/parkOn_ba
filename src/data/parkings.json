@@ -50,7 +50,7 @@
     "tiempo": "6 min",
     "tarifaHora": 1300,
     "tarifaOchoHoras": 8400,
-    "disponibilidad": 4,
+    "disponibilidad": 0,
     "rating": 4.1,
     "servicios": ["Cubierto", "Camaras", "Acceso con QR"],
     "imagen": "/parking.jpeg"

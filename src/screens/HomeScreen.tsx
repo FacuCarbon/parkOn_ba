@@ -109,7 +109,7 @@ export function HomeScreen({
           onSelectParking={onSelectParking}
         />
         <div className="absolute bottom-[18px] left-[27px] right-[27px]">
-          <ParkingCard parking={parking} onReserve={onReserve} />
+          <ParkingCard parking={parking} onReserve={onReserve} mapOverlay />
         </div>
       </div>
     </div>
