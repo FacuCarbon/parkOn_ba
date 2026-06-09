@@ -14,7 +14,7 @@ export function AppHeader() {
         <Wifi size={13} strokeWidth={3} />
         <BatteryFull size={18} strokeWidth={2.4} />
       </div>
-      <Logo variant="pdfHeaderExact" />
+      <Logo variant="clientHeader" />
       <div className="flex items-center gap-1">
         <button
           className="grid h-10 w-10 place-items-center rounded-full border-0 bg-transparent text-white"
