@@ -12,10 +12,11 @@ import { HomeScreen } from "./HomeScreen";
 import { ParkingDetailScreen } from "./ParkingDetailScreen";
 import { ProfileScreen } from "./ProfileScreen";
 import { ReservationsScreen } from "./ReservationsScreen";
+import { ScheduleSelectionScreen } from "./ScheduleSelectionScreen";
 import { SearchScreen } from "./SearchScreen";
 
 const initialParkings = parkings as Parking[];
-type BookingStep = "tabs" | "detail" | "summary" | "qr";
+type BookingStep = "tabs" | "detail" | "schedule" | "summary" | "qr";
 const RESERVATION_STORAGE_KEY = "parkonba.reservations";
 const PARKING_STORAGE_KEY = "parkonba.parkings";
 
@@ -138,6 +139,10 @@ export function DriverApp() {
     setBookingStep("detail");
   }
 
+  function openSchedule() {
+    setBookingStep("schedule");
+  }
+
   function closeFlow() {
     setBookingStep("tabs");
   }
@@ -146,9 +151,18 @@ export function DriverApp() {
     setBookingStep("detail");
   }
 
+  function backToSchedule() {
+    setBookingStep("schedule");
+  }
+
   function backToReservations() {
     setBookingStep("tabs");
     setActiveTab("reservas");
+  }
+
+  function backToHome() {
+    setBookingStep("tabs");
+    setActiveTab("inicio");
   }
 
   function openSummary(selection: BookingSelection) {
@@ -253,8 +267,18 @@ export function DriverApp() {
     setSelectedParkingId(parking.id);
   }
 
+  function openExplore() {
+    setBookingStep("tabs");
+    setActiveTab("buscar");
+  }
+
   function handleFlowBack() {
     if (bookingStep === "summary") {
+      backToSchedule();
+      return;
+    }
+
+    if (bookingStep === "schedule") {
       backToDetail();
       return;
     }
@@ -270,13 +294,21 @@ export function DriverApp() {
   return (
     <DriverLayout
       activeTab={activeTab}
+      showHeader={bookingStep === "tabs"}
       showBottomNav={bookingStep === "tabs"}
       onTabChange={changeTab}
     >
       {bookingStep === "detail" && (
         <ParkingDetailScreen
           parking={selectedParking}
-          onReserve={openSummary}
+          onReserve={openSchedule}
+          onBack={handleFlowBack}
+        />
+      )}
+      {bookingStep === "schedule" && (
+        <ScheduleSelectionScreen
+          parking={selectedParking}
+          onContinue={openSummary}
           onBack={handleFlowBack}
         />
       )}
@@ -292,7 +324,8 @@ export function DriverApp() {
         <FinalQrScreen
           parking={qrParking}
           reservation={selectedReservation ?? activeReservation}
-          onBack={handleFlowBack}
+          onOpenReservations={backToReservations}
+          onGoHome={backToHome}
         />
       )}
       {bookingStep === "tabs" && (
@@ -301,6 +334,7 @@ export function DriverApp() {
             <HomeScreen
               parking={selectedParking}
               parkings={parkingList}
+              onExplore={openExplore}
               onReserve={openDetail}
               onSelectParking={selectParking}
             />
