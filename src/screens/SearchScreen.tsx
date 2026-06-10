@@ -150,7 +150,7 @@ export function SearchScreen({
         <MockMap
           className="h-full"
           parkings={displayedParkings}
-          selectedParkingId={parking.id}
+          selectedParkingId={visibleParking?.id}
           onSelectParking={onSelectParking}
         />
         <div className="absolute bottom-[18px] left-[18px] right-[18px] rounded-[18px] bg-white p-3 shadow-[0_12px_34px_rgba(8,20,45,0.16)]">

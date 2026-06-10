@@ -1,6 +1,27 @@
-import { CalendarClock, Clock3, MapPin, QrCode, XCircle } from "lucide-react";
+import {
+  CalendarClock,
+  Clock3,
+  MapPin,
+  QrCode,
+  X,
+  XCircle,
+} from "lucide-react";
+import { useState } from "react";
 import type { Parking } from "../types/parking";
 import type { Reservation } from "../types/reservation";
+
+const qrCells = [
+  1, 1, 1, 0, 1, 0, 0, 1, 1, 0,
+  1, 0, 1, 0, 0, 1, 1, 0, 1, 1,
+  1, 1, 1, 1, 0, 1, 0, 1, 0, 0,
+  0, 0, 1, 0, 1, 1, 1, 0, 1, 0,
+  1, 0, 0, 1, 1, 0, 1, 1, 0, 1,
+  0, 1, 1, 0, 0, 1, 0, 0, 1, 1,
+  1, 1, 0, 1, 0, 1, 1, 1, 0, 0,
+  0, 1, 0, 1, 1, 0, 0, 1, 1, 0,
+  1, 0, 1, 0, 1, 1, 0, 1, 0, 1,
+  1, 1, 0, 0, 1, 0, 1, 0, 1, 1,
+];
 
 export function ReservationsScreen({
   parking,
@@ -9,7 +30,6 @@ export function ReservationsScreen({
   maxActiveReservations,
   onReserve,
   onCancel,
-  onOpenQr,
 }: {
   parking: Parking;
   activeReservations: Reservation[];
@@ -17,12 +37,13 @@ export function ReservationsScreen({
   maxActiveReservations: number;
   onReserve: () => void;
   onCancel: (reservationId: string) => void;
-  onOpenQr: (reservation: Reservation) => void;
 }) {
+  const [qrReservation, setQrReservation] = useState<Reservation | null>(null);
+
   if (activeReservations.length > 0) {
     return (
-      <div className="h-full overflow-y-auto bg-[#f6f8fb]">
-        <div className="px-6 pb-7 pt-5">
+      <div className="relative h-full overflow-hidden bg-[#f6f8fb]">
+        <div className="h-full overflow-y-auto px-6 pb-7 pt-5">
           <div className="mb-3 flex items-center justify-between">
             <h1 className="text-lg font-black text-[#071226]">
               Mis reservas activas
@@ -78,7 +99,7 @@ export function ReservationsScreen({
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   <button
                     className="flex min-h-[44px] items-center justify-center gap-2 rounded-md border-0 bg-[#002856] text-xs font-black text-white"
-                    onClick={() => onOpenQr(reservation)}
+                    onClick={() => setQrReservation(reservation)}
                     type="button"
                   >
                     <QrCode size={16} />
@@ -128,13 +149,73 @@ export function ReservationsScreen({
                       {reservation.dateLabel} · {reservation.startTime} -{" "}
                       {reservation.endTime}
                     </p>
-                    <p className="m-0 mt-1 text-[#d64242]">Cancelada</p>
+                    <p className="m-0 mt-1 text-[#d64242]">
+                      {reservation.status === "cancelled"
+                        ? "Cancelada"
+                        : "Finalizada"}
+                    </p>
                   </div>
                 ))}
               </div>
             </section>
           )}
         </div>
+        {qrReservation && (
+          <div className="absolute inset-0 z-20 grid place-items-center bg-[#071226]/75 px-5">
+            <section
+              className="w-full max-w-[300px] rounded-[16px] bg-white p-5 text-center text-[#071226] shadow-[0_18px_42px_rgba(0,0,0,0.28)]"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="reservation-qr-title"
+            >
+              <div className="mb-4 flex items-center justify-between gap-3 text-left">
+                <div>
+                  <p className="m-0 text-xs font-black uppercase text-[#2DB84B]">
+                    QR de ingreso
+                  </p>
+                  <h2
+                    id="reservation-qr-title"
+                    className="m-0 mt-1 text-base font-black text-[#071226]"
+                  >
+                    {qrReservation.parkingName}
+                  </h2>
+                </div>
+                <button
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border-0 bg-[#f2f5f9] text-[#071226]"
+                  onClick={() => setQrReservation(null)}
+                  type="button"
+                  aria-label="Cerrar QR"
+                >
+                  <X size={18} strokeWidth={3} />
+                </button>
+              </div>
+
+              <div className="mx-auto grid h-[170px] w-[170px] grid-cols-10 grid-rows-10 gap-[3px] rounded-[10px] bg-white p-3 shadow-[inset_0_0_0_1px_#e5eaf1]">
+                {qrCells.map((cell, index) => (
+                  <span
+                    key={index}
+                    className={cell ? "bg-[#071226]" : "bg-white"}
+                  />
+                ))}
+              </div>
+
+              <p className="m-0 mt-4 text-sm font-black">
+                Código #{qrReservation.code}
+              </p>
+              <p className="m-0 mt-2 text-xs font-bold leading-relaxed text-[#5d6a7f]">
+                {qrReservation.dateLabel} · {qrReservation.startTime} -{" "}
+                {qrReservation.endTime}
+              </p>
+              <button
+                className="mt-5 min-h-[44px] w-full rounded-md border-0 bg-[#002856] text-sm font-black text-white"
+                onClick={() => setQrReservation(null)}
+                type="button"
+              >
+                Cerrar
+              </button>
+            </section>
+          </div>
+        )}
       </div>
     );
   }
