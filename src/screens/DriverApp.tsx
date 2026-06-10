@@ -19,6 +19,22 @@ const initialParkings = parkings as Parking[];
 type BookingStep = "tabs" | "detail" | "schedule" | "summary" | "qr";
 const RESERVATION_STORAGE_KEY = "parkonba.reservations";
 const PARKING_STORAGE_KEY = "parkonba.parkings";
+const MAX_ACTIVE_RESERVATIONS = 3;
+const MONTH_INDEX_BY_NAME: Record<string, number> = {
+  enero: 0,
+  febrero: 1,
+  marzo: 2,
+  abril: 3,
+  mayo: 4,
+  junio: 5,
+  julio: 6,
+  agosto: 7,
+  septiembre: 8,
+  setiembre: 8,
+  octubre: 9,
+  noviembre: 10,
+  diciembre: 11,
+};
 
 function readStoredParkings(): Parking[] {
   const storedParkings = window.localStorage.getItem(PARKING_STORAGE_KEY);
@@ -68,6 +84,56 @@ function persistParkings(nextParkings: Parking[]) {
   window.localStorage.setItem(PARKING_STORAGE_KEY, JSON.stringify(nextParkings));
 }
 
+function getReservationEndDate(reservation: Reservation) {
+  const startDate = reservation.dateISO
+    ? new Date(reservation.dateISO)
+    : parseReservationStartDate(reservation);
+
+  if (Number.isNaN(startDate.getTime())) {
+    return null;
+  }
+
+  const endDate = new Date(startDate);
+  endDate.setHours(endDate.getHours() + reservation.durationHours);
+
+  return endDate;
+}
+
+function parseReservationStartDate(reservation: Reservation) {
+  const dateMatch = reservation.dateLabel
+    .toLowerCase()
+    .match(/(\d{1,2})\s+de\s+([a-záéíóúñ]+)/i);
+  const [hour, minute] = reservation.startTime.split(":").map(Number);
+
+  if (!dateMatch || Number.isNaN(hour) || Number.isNaN(minute)) {
+    return new Date(Number.NaN);
+  }
+
+  const day = Number(dateMatch[1]);
+  const monthName = dateMatch[2].normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const monthIndex = MONTH_INDEX_BY_NAME[monthName];
+
+  if (monthIndex === undefined) {
+    return new Date(Number.NaN);
+  }
+
+  const startDate = new Date();
+  startDate.setMonth(monthIndex, day);
+  startDate.setHours(hour, minute, 0, 0);
+
+  return startDate;
+}
+
+function isReservationCurrent(reservation: Reservation) {
+  const endDate = getReservationEndDate(reservation);
+
+  if (!endDate) {
+    return true;
+  }
+
+  return endDate.getTime() > Date.now();
+}
+
 function getFallbackBooking() {
   const startDate = new Date();
   startDate.setMinutes(startDate.getMinutes() < 30 ? 30 : 60, 0, 0);
@@ -79,6 +145,7 @@ function getFallbackBooking() {
       day: "numeric",
       month: "long",
     })}`,
+    dateISO: startDate.toISOString(),
     startTime: startDate.toLocaleTimeString("es-AR", {
       hour: "2-digit",
       minute: "2-digit",
@@ -116,10 +183,12 @@ export function DriverApp() {
     (reservation) => reservation.userId === currentUser?.id,
   );
   const activeReservations = userReservations.filter(
-    (reservation) => reservation.status === "active",
+    (reservation) =>
+      reservation.status === "active" && isReservationCurrent(reservation),
   );
   const reservationHistory = userReservations.filter(
-    (reservation) => reservation.status !== "active",
+    (reservation) =>
+      reservation.status !== "active" || !isReservationCurrent(reservation),
   );
   const activeReservation =
     activeReservations.find(
@@ -135,11 +204,26 @@ export function DriverApp() {
         parking.id === (selectedReservation?.parkingId ?? activeReservation?.parkingId),
     ) ?? selectedParking;
 
+  function redirectToReservationLimit() {
+    setBookingStep("tabs");
+    setActiveTab("reservas");
+  }
+
   function openDetail() {
+    if (activeReservations.length >= MAX_ACTIVE_RESERVATIONS) {
+      redirectToReservationLimit();
+      return;
+    }
+
     setBookingStep("detail");
   }
 
   function openSchedule() {
+    if (activeReservations.length >= MAX_ACTIVE_RESERVATIONS) {
+      redirectToReservationLimit();
+      return;
+    }
+
     setBookingStep("schedule");
   }
 
@@ -181,9 +265,8 @@ export function DriverApp() {
       return;
     }
 
-    if (activeReservations.length >= 3) {
-      setBookingStep("tabs");
-      setActiveTab("reservas");
+    if (activeReservations.length >= MAX_ACTIVE_RESERVATIONS) {
+      redirectToReservationLimit();
       return;
     }
 
@@ -196,6 +279,7 @@ export function DriverApp() {
       parkingAddress: selectedParking.direccion,
       parkingImage: selectedParking.imagen,
       dateLabel: bookingSelection?.dateLabel ?? fallbackBooking.dateLabel,
+      dateISO: bookingSelection?.dateISO ?? fallbackBooking.dateISO,
       startTime: bookingSelection?.startTime ?? fallbackBooking.startTime,
       endTime: bookingSelection?.endTime ?? fallbackBooking.endTime,
       durationHours: bookingSelection?.durationHours ?? 2,
@@ -251,11 +335,6 @@ export function DriverApp() {
         return nextParkings;
       });
     }
-  }
-
-  function openReservationQr(reservation: Reservation) {
-    setSelectedReservation(reservation);
-    setBookingStep("qr");
   }
 
   function changeTab(tab: TabId) {
@@ -352,10 +431,9 @@ export function DriverApp() {
               parking={reservationParking}
               activeReservations={activeReservations}
               reservationHistory={reservationHistory}
-              maxActiveReservations={3}
-              onReserve={openDetail}
+              maxActiveReservations={MAX_ACTIVE_RESERVATIONS}
+              onReserve={openExplore}
               onCancel={cancelReservation}
-              onOpenQr={openReservationQr}
             />
           )}
           {activeTab === "perfil" && <ProfileScreen />}

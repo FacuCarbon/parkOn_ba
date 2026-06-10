@@ -8,6 +8,7 @@ export type Reservation = {
   parkingAddress: string;
   parkingImage: string;
   dateLabel: string;
+  dateISO?: string;
   startTime: string;
   endTime: string;
   durationHours: number;
